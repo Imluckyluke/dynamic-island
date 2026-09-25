@@ -82,18 +82,24 @@ class IslandService : Service() {
     override fun onCreate() {
         super.onCreate()
         overlay = IslandOverlay(this, getSystemService(WindowManager::class.java))
-        registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val batteryFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(batteryReceiver, batteryFilter, RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(batteryReceiver, batteryFilter)
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startAsForeground()
+        if (intent?.action == ACTION_STOP) {
+            overlay.hide()
+            IslandPrefs.setServiceEnabled(this, false)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        if (!ensureOverlay()) return START_NOT_STICKY
         when (intent?.action) {
-            ACTION_STOP -> {
-                overlay.hide()
-                IslandPrefs.setServiceEnabled(this, false)
-                stopSelf()
-                return START_NOT_STICKY
-            }
             ACTION_MEDIA_COMMAND -> {
                 val command = MediaMonitor.Command.values().getOrNull(
                     intent.getIntExtra(EXTRA_MEDIA_COMMAND, -1)
@@ -112,16 +118,21 @@ class IslandService : Service() {
             )
             ACTION_DISMISS -> dismissIsland()
             else -> {
-                if (!Settings.canDrawOverlays(this)) {
-                    Toast.makeText(this, R.string.msg_need_overlay, Toast.LENGTH_SHORT).show()
-                    stopSelf()
-                    return START_NOT_STICKY
-                }
                 IslandPrefs.setServiceEnabled(this, true)
-                overlay.show()
             }
         }
         return START_STICKY
+    }
+
+    private fun ensureOverlay(): Boolean {
+        if (!Settings.canDrawOverlays(this)) {
+            Toast.makeText(this, R.string.msg_need_overlay, Toast.LENGTH_SHORT).show()
+            stopSelf()
+            return false
+        }
+        IslandPrefs.setServiceEnabled(this, true)
+        overlay.show()
+        return true
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

@@ -3,17 +3,20 @@ package com.hadi.dynamicisland
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.color.DynamicColors
 import com.google.android.material.switchmaterial.SwitchMaterial
 import android.widget.TextView
 
@@ -23,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var tvStatus: TextView
+    private lateinit var statusDot: View
     private lateinit var swSuppress: SwitchMaterial
     private lateinit var swKeepPriority: SwitchMaterial
     private lateinit var swMedia: SwitchMaterial
@@ -30,9 +34,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swTimer: SwitchMaterial
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        DynamicColors.applyToActivityIfAvailable(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         tvStatus = findViewById(R.id.tvStatus)
+        statusDot = findViewById(R.id.statusDot)
         swSuppress = findViewById(R.id.swSuppressDuplicates)
         swKeepPriority = findViewById(R.id.swKeepPriority)
         swMedia = findViewById(R.id.swMedia)
@@ -138,8 +144,25 @@ class MainActivity : AppCompatActivity() {
             PackageManager.PERMISSION_GRANTED
         val ready = overlay && listener && battery && notifications
         tvStatus.text = getString(
-            if (ready) R.string.service_status_enabled else R.string.service_status_disabled
+            if (ready) R.string.status_ready else R.string.status_missing
         )
+        statusDot.backgroundTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(
+                this,
+                if (ready) android.R.color.holo_green_dark else android.R.color.holo_red_dark
+            )
+        )
+        updatePermissionButton(R.id.btnOverlayPermission, overlay)
+        updatePermissionButton(R.id.btnNotificationAccess, listener)
+        updatePermissionButton(R.id.btnBatteryOptimization, battery)
+        updatePermissionButton(R.id.btnPostNotifications, notifications)
+    }
+
+    private fun updatePermissionButton(id: Int, granted: Boolean) {
+        findViewById<MaterialButton>(id).apply {
+            text = getString(if (granted) R.string.status_granted else R.string.btn_grant)
+            isEnabled = !granted
+        }
     }
 
     private fun requestPostNotifications() {
