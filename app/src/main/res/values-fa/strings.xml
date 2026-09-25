@@ -10,7 +10,14 @@
     <string name="section_permissions">دسترسی‌ها</string>
     <string name="section_behavior">رفتار آیلند</string>
     <string name="section_timer">تایمر</string>
+    <string name="section_geometry">موقعیت و اندازه آیلند</string>
     <string name="section_actions">اقدام‌ها</string>
+    <string name="label_auto_position">تشخیص خودکار بریدگی دوربین</string>
+    <string name="label_center_offset">جابه‌جایی مرکز</string>
+    <string name="label_top_offset">فاصله از بالا</string>
+    <string name="label_pill_width">عرض قرص</string>
+    <string name="label_pill_height">ارتفاع قرص</string>
+    <string name="geometry_desc">برای تنظیم دستی، تشخیص خودکار را خاموش کن.</string>
     <string name="perm_overlay_desc">برای نمایش قرص شناور لازم است.</string>
     <string name="perm_notification_desc">برای خواندن اعلان‌ها و کنترل موزیک لازم است.</string>
     <string name="perm_battery_desc">آیلند را در پس‌زمینه زنده نگه می‌دارد.</string>

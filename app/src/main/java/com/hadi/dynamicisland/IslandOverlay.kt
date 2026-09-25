@@ -2,12 +2,14 @@ package com.hadi.dynamicisland
 
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -22,21 +24,20 @@ class IslandOverlay(
 
     fun show() {
         if (root != null) {
-            update()
+            recalibrate()
             return
         }
         val themedService = ContextThemeWrapper(service, R.style.Theme_DynamicIsland)
         val view = LayoutInflater.from(themedService).inflate(R.layout.island_view, null)
-        val density = service.resources.displayMetrics.density
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            y = statusBarHeight() + (8f * density).toInt()
+            gravity = Gravity.TOP
+            y = 0
         }
         view.findViewById<View>(R.id.islandPill).setOnClickListener { toggleExpanded() }
         view.findViewById<ImageButton>(R.id.btnMediaPrevious).setOnClickListener {
@@ -63,6 +64,38 @@ class IslandOverlay(
         root = view
         IslandState.addListener(stateListener)
         update()
+        view.post { recalibrate() }
+    }
+
+    fun recalibrate() {
+        val view = root ?: return
+        val geometry = geometry()
+        val pill = view.findViewById<LinearLayout>(R.id.islandPill)
+        val expandedView = view.findViewById<LinearLayout>(R.id.islandExpanded)
+        val expandedWidth = maxOf((280f * service.resources.displayMetrics.density).toInt(), geometry.pillWidth)
+        pill.layoutParams = FrameLayout.LayoutParams(
+            geometry.pillWidth,
+            geometry.pillHeight,
+            Gravity.START or Gravity.TOP
+        ).apply {
+            leftMargin = geometry.centerX - geometry.pillWidth / 2
+        }
+        expandedView.layoutParams = FrameLayout.LayoutParams(
+            expandedWidth,
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            Gravity.START or Gravity.TOP
+        ).apply {
+            leftMargin = geometry.centerX - expandedWidth / 2
+        }
+        (view.layoutParams as? WindowManager.LayoutParams)?.let { params ->
+            params.y = geometry.top
+            try {
+                windowManager.updateViewLayout(view, params)
+            } catch (e: Exception) {
+                IslandLog.log(service, "OVERLAY", "Overlay geometry update failed", e)
+            }
+        }
+        update()
     }
 
     fun hide() {
@@ -79,17 +112,54 @@ class IslandOverlay(
 
     fun toggleExpanded() {
         expanded = !expanded
-        update()
+        recalibrate()
     }
 
     fun collapse() {
         expanded = false
-        update()
+        recalibrate()
     }
 
-    private fun statusBarHeight(): Int {
-        val identifier = service.resources.getIdentifier("status_bar_height", "dimen", "android")
-        return if (identifier > 0) service.resources.getDimensionPixelSize(identifier) else 0
+    private data class Geometry(
+        val centerX: Int,
+        val pillWidth: Int,
+        val pillHeight: Int,
+        val top: Int
+    )
+
+    private fun geometry(): Geometry {
+        val density = service.resources.displayMetrics.density
+        val screenWidth = screenWidthPx()
+        if (IslandPrefs.autoPosition(service)) {
+            val rect = root?.rootWindowInsets?.displayCutout?.boundingRects?.firstOrNull()
+            if (rect != null) {
+                val pillWidth = rect.width() + (48f * density).toInt()
+                val pillHeight = rect.height() + (24f * density).toInt()
+                return Geometry(
+                    centerX = rect.centerX(),
+                    pillWidth = pillWidth.coerceAtLeast((96f * density).toInt()),
+                    pillHeight = pillHeight.coerceAtLeast((28f * density).toInt()),
+                    top = (rect.top - 12f * density).toInt().coerceAtLeast(0)
+                )
+            }
+        }
+        val manualWidth = (IslandPrefs.pillWidthDp(service) * density).toInt()
+        val manualHeight = (IslandPrefs.pillHeightDp(service) * density).toInt()
+        return Geometry(
+            centerX = screenWidth / 2 + (IslandPrefs.centerOffsetDp(service) * density).toInt(),
+            pillWidth = manualWidth.coerceAtLeast((96f * density).toInt()),
+            pillHeight = manualHeight.coerceAtLeast((28f * density).toInt()),
+            top = (IslandPrefs.topOffsetDp(service) * density).toInt().coerceAtLeast(0)
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    private fun screenWidthPx(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            windowManager.currentWindowMetrics.bounds.width()
+        } else {
+            service.resources.displayMetrics.widthPixels
+        }
     }
 
     private fun update() {

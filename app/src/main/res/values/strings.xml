@@ -10,7 +10,14 @@
     <string name="section_permissions">Permissions</string>
     <string name="section_behavior">Island behavior</string>
     <string name="section_timer">Timer</string>
+    <string name="section_geometry">Island position and size</string>
     <string name="section_actions">Actions</string>
+    <string name="label_auto_position">Detect camera cutout automatically</string>
+    <string name="label_center_offset">Center offset</string>
+    <string name="label_top_offset">Top offset</string>
+    <string name="label_pill_width">Pill width</string>
+    <string name="label_pill_height">Pill height</string>
+    <string name="geometry_desc">Turn off automatic detection to tune the pill manually.</string>
     <string name="perm_overlay_desc">Required to draw the floating pill.</string>
     <string name="perm_notification_desc">Required to read alerts and control media.</string>
     <string name="perm_battery_desc">Keeps the island alive in the background.</string>

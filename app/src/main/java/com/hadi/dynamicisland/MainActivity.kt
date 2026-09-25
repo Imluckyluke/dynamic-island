@@ -18,6 +18,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.DynamicColors
+import com.google.android.material.slider.Slider
 import com.google.android.material.switchmaterial.SwitchMaterial
 import android.widget.TextView
 
@@ -33,6 +34,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swMedia: SwitchMaterial
     private lateinit var swCharging: SwitchMaterial
     private lateinit var swTimer: SwitchMaterial
+    private lateinit var swAutoPosition: SwitchMaterial
+    private lateinit var sliderCenterOffset: Slider
+    private lateinit var sliderTopOffset: Slider
+    private lateinit var sliderPillWidth: Slider
+    private lateinit var sliderPillHeight: Slider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         DynamicColors.applyToActivityIfAvailable(this)
@@ -47,6 +53,11 @@ class MainActivity : AppCompatActivity() {
         swMedia = findViewById(R.id.swMedia)
         swCharging = findViewById(R.id.swCharging)
         swTimer = findViewById(R.id.swTimer)
+        swAutoPosition = findViewById(R.id.swAutoPosition)
+        sliderCenterOffset = findViewById(R.id.sliderCenterOffset)
+        sliderTopOffset = findViewById(R.id.sliderTopOffset)
+        sliderPillWidth = findViewById(R.id.sliderPillWidth)
+        sliderPillHeight = findViewById(R.id.sliderPillHeight)
 
         swSuppress.isChecked = IslandPrefs.suppressDuplicates(this)
         swKeepPriority.isChecked = IslandPrefs.keepPriority(this)
@@ -68,6 +79,28 @@ class MainActivity : AppCompatActivity() {
         swTimer.setOnCheckedChangeListener { _, checked ->
             IslandPrefs.setShowTimer(this, checked)
         }
+        swAutoPosition.isChecked = IslandPrefs.autoPosition(this)
+        sliderCenterOffset.value = IslandPrefs.centerOffsetDp(this)
+        sliderTopOffset.value = IslandPrefs.topOffsetDp(this)
+        sliderPillWidth.value = IslandPrefs.pillWidthDp(this)
+        sliderPillHeight.value = IslandPrefs.pillHeightDp(this)
+        swAutoPosition.setOnCheckedChangeListener { _, checked ->
+            IslandPrefs.setAutoPosition(this, checked)
+            refreshGeometryEditors()
+        }
+        sliderCenterOffset.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) IslandPrefs.setCenterOffsetDp(this, value)
+        }
+        sliderTopOffset.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) IslandPrefs.setTopOffsetDp(this, value)
+        }
+        sliderPillWidth.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) IslandPrefs.setPillWidthDp(this, value)
+        }
+        sliderPillHeight.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) IslandPrefs.setPillHeightDp(this, value)
+        }
+        refreshGeometryEditors()
 
         findViewById<MaterialButton>(R.id.btnOverlayPermission).setOnClickListener {
             startActivity(
@@ -166,6 +199,14 @@ class MainActivity : AppCompatActivity() {
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivity(Intent.createChooser(share, getString(R.string.share_logs_title)))
         IslandLog.log(this, "MAIN", "Logs shared")
+    }
+
+    private fun refreshGeometryEditors() {
+        val manual = !IslandPrefs.autoPosition(this)
+        sliderCenterOffset.isEnabled = manual
+        sliderTopOffset.isEnabled = manual
+        sliderPillWidth.isEnabled = manual
+        sliderPillHeight.isEnabled = manual
     }
 
     private fun refreshStatus() {

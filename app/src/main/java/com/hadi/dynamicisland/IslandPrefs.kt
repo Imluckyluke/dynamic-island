@@ -10,6 +10,11 @@ object IslandPrefs {
     private const val KEY_SHOW_MEDIA = "show_media"
     private const val KEY_SHOW_CHARGING = "show_charging"
     private const val KEY_SHOW_TIMER = "show_timer"
+    private const val KEY_AUTO_POSITION = "auto_position"
+    private const val KEY_CENTER_OFFSET = "center_offset_dp"
+    private const val KEY_TOP_OFFSET = "top_offset_dp"
+    private const val KEY_PILL_WIDTH = "pill_width_dp"
+    private const val KEY_PILL_HEIGHT = "pill_height_dp"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -54,5 +59,40 @@ object IslandPrefs {
 
     fun setShowTimer(context: Context, show: Boolean) {
         prefs(context).edit().putBoolean(KEY_SHOW_TIMER, show).apply()
+    }
+
+    fun autoPosition(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_AUTO_POSITION, true)
+
+    fun setAutoPosition(context: Context, auto: Boolean) {
+        prefs(context).edit().putBoolean(KEY_AUTO_POSITION, auto).apply()
+    }
+
+    fun centerOffsetDp(context: Context): Float =
+        prefs(context).getFloat(KEY_CENTER_OFFSET, 0f)
+
+    fun setCenterOffsetDp(context: Context, offsetDp: Float) {
+        prefs(context).edit().putFloat(KEY_CENTER_OFFSET, offsetDp).apply()
+    }
+
+    fun topOffsetDp(context: Context): Float =
+        prefs(context).getFloat(KEY_TOP_OFFSET, 8f)
+
+    fun setTopOffsetDp(context: Context, offsetDp: Float) {
+        prefs(context).edit().putFloat(KEY_TOP_OFFSET, offsetDp).apply()
+    }
+
+    fun pillWidthDp(context: Context): Float =
+        prefs(context).getFloat(KEY_PILL_WIDTH, 160f)
+
+    fun setPillWidthDp(context: Context, widthDp: Float) {
+        prefs(context).edit().putFloat(KEY_PILL_WIDTH, widthDp).apply()
+    }
+
+    fun pillHeightDp(context: Context): Float =
+        prefs(context).getFloat(KEY_PILL_HEIGHT, 36f)
+
+    fun setPillHeightDp(context: Context, heightDp: Float) {
+        prefs(context).edit().putFloat(KEY_PILL_HEIGHT, heightDp).apply()
     }
 }
