@@ -45,6 +45,9 @@ class IslandOverlay(
                 layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                blurBehindRadius = 48
+            }
         }
         val pill = view.findViewById<View>(R.id.islandPill)
         pill.setOnClickListener { service.openContent() }
@@ -95,12 +98,14 @@ class IslandOverlay(
         ).apply {
             leftMargin = geometry.centerX - geometry.pillWidth / 2
         }
+        val density = service.resources.displayMetrics.density
         expandedView.layoutParams = FrameLayout.LayoutParams(
             expandedWidth,
             FrameLayout.LayoutParams.WRAP_CONTENT,
             Gravity.START or Gravity.TOP
         ).apply {
             leftMargin = geometry.centerX - expandedWidth / 2
+            topMargin = (statusBarHeight() + (10f * density).toInt() - geometry.top).coerceAtLeast(0)
         }
         (view.layoutParams as? WindowManager.LayoutParams)?.let { params ->
             params.y = geometry.top
@@ -110,6 +115,12 @@ class IslandOverlay(
                 IslandLog.log(service, "OVERLAY", "Overlay geometry update failed", e)
             }
         }
+        IslandLog.log(
+            service,
+            "OVERLAY",
+            "Geometry center=${geometry.centerX} pill=${geometry.pillWidth}x${geometry.pillHeight} " +
+                "top=${geometry.top} expanded=$expanded status=${statusBarHeight()}"
+        )
         update()
     }
 
@@ -142,6 +153,34 @@ class IslandOverlay(
     fun collapse() {
         expanded = false
         recalibrate()
+    }
+
+    fun collapseAnimated(onDone: () -> Unit = {}) {
+        val view = root
+        val expandedView = view?.findViewById<View>(R.id.islandExpanded)
+        if (view == null || expandedView == null || !expanded) {
+            collapse()
+            onDone()
+            return
+        }
+        val density = service.resources.displayMetrics.density
+        expandedView.animate().cancel()
+        expandedView.animate()
+            .translationY(-24f * density)
+            .alpha(0f)
+            .scaleX(0.96f)
+            .scaleY(0.96f)
+            .setDuration(220)
+            .withEndAction {
+                if (root == null) {
+                    onDone()
+                    return@withEndAction
+                }
+                expanded = false
+                recalibrate()
+                onDone()
+            }
+            .start()
     }
 
     private data class Geometry(
@@ -184,6 +223,11 @@ class IslandOverlay(
             pillHeight = manualHeight.coerceAtLeast((24f * density).toInt()),
             top = (IslandPrefs.topOffsetDp(service) * density).toInt().coerceAtLeast(0)
         )
+    }
+
+    private fun statusBarHeight(): Int {
+        val identifier = service.resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (identifier > 0) service.resources.getDimensionPixelSize(identifier) else 0
     }
 
     @Suppress("DEPRECATION")

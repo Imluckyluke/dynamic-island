@@ -187,8 +187,7 @@ class IslandService : Service() {
 
     fun dismissIsland() {
         handler.removeCallbacks(restoreDefault)
-        overlay.collapse()
-        restoreAfterTransient()
+        overlay.collapseAnimated { restoreAfterTransient() }
     }
 
     fun toggleIsland() {
@@ -318,18 +317,19 @@ class IslandService : Service() {
     }
 
     private fun restoreAfterTransient() {
-        overlay.collapse()
-        if (timerEndElapsed > SystemClock.elapsedRealtime()) {
-            updateTimer()
-            return
-        }
-        timerEndElapsed = 0L
-        val controller = IslandState.activeMediaController
-        val playing = controller?.playbackState?.state == PlaybackState.STATE_PLAYING
-        if (controller != null && playing && IslandPrefs.showMedia(this)) {
-            MediaMonitor.updateFromController(this, controller)
-        } else {
-            IslandState.setContent(IslandState.Content("", "", IslandState.Kind.IDLE))
+        overlay.collapseAnimated {
+            if (timerEndElapsed > SystemClock.elapsedRealtime()) {
+                updateTimer()
+                return@collapseAnimated
+            }
+            timerEndElapsed = 0L
+            val controller = IslandState.activeMediaController
+            val playing = controller?.playbackState?.state == PlaybackState.STATE_PLAYING
+            if (controller != null && playing && IslandPrefs.showMedia(this)) {
+                MediaMonitor.updateFromController(this, controller)
+            } else {
+                IslandState.setContent(IslandState.Content("", "", IslandState.Kind.IDLE))
+            }
         }
     }
 }
