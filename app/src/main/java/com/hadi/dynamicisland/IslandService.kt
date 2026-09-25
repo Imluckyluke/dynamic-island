@@ -311,11 +311,14 @@ class IslandService : Service() {
     fun showTransient(content: IslandState.Content, durationMs: Long) {
         handler.removeCallbacks(timerTick)
         handler.removeCallbacks(restoreDefault)
+        IslandLog.log(this, "SERVICE", "Transient kind=${content.kind}")
+        overlay.setExpanded(true)
         IslandState.setContent(content)
         handler.postDelayed(restoreDefault, durationMs)
     }
 
     private fun restoreAfterTransient() {
+        overlay.collapse()
         if (timerEndElapsed > SystemClock.elapsedRealtime()) {
             updateTimer()
             return

@@ -447,6 +447,14 @@
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDetectCutout"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/btn_detect_cutout" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -490,8 +498,8 @@
                     android:id="@+id/sliderPillWidth"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:value="160"
-                    android:valueFrom="96"
+                    android:value="44"
+                    android:valueFrom="24"
                     android:valueTo="240"
                     android:stepSize="1" />
 
@@ -506,8 +514,8 @@
                     android:id="@+id/sliderPillHeight"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:value="36"
-                    android:valueFrom="28"
+                    android:value="32"
+                    android:valueFrom="24"
                     android:valueTo="72"
                     android:stepSize="1" />
             </LinearLayout>

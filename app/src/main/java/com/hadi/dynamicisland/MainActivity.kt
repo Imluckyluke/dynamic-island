@@ -86,7 +86,10 @@ class MainActivity : AppCompatActivity() {
         sliderPillHeight.value = IslandPrefs.pillHeightDp(this)
         swAutoPosition.setOnCheckedChangeListener { _, checked ->
             IslandPrefs.setAutoPosition(this, checked)
-            refreshGeometryEditors()
+        refreshGeometryEditors()
+        findViewById<MaterialButton>(R.id.btnDetectCutout).setOnClickListener {
+            detectCutout()
+        }
         }
         sliderCenterOffset.addOnChangeListener { _, value, fromUser ->
             if (fromUser) IslandPrefs.setCenterOffsetDp(this, value)
@@ -164,6 +167,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        detectCutout()
         refreshStatus()
     }
 
@@ -199,6 +203,29 @@ class MainActivity : AppCompatActivity() {
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         startActivity(Intent.createChooser(share, getString(R.string.share_logs_title)))
         IslandLog.log(this, "MAIN", "Logs shared")
+    }
+
+    private fun detectCutout() {
+        if (!IslandPrefs.autoPosition(this)) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return
+        IslandLog.log(this, "MAIN", "Cutout detection requested")
+        window.decorView.post {
+            val rect = window.decorView.rootWindowInsets
+                ?.displayCutout?.boundingRects?.firstOrNull() ?: return@post
+            val density = resources.displayMetrics.density
+            IslandPrefs.setAutoGeometry(
+                this,
+                rect.centerX() / density,
+                rect.width() / density,
+                rect.height() / density,
+                rect.top / density
+            )
+            IslandLog.log(
+                this,
+                "MAIN",
+                "Cutout detected center=${rect.centerX()} size=${rect.width()}x${rect.height()}"
+            )
+        }
     }
 
     private fun refreshGeometryEditors() {

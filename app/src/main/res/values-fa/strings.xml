@@ -18,6 +18,7 @@
     <string name="label_pill_width">عرض قرص</string>
     <string name="label_pill_height">ارتفاع قرص</string>
     <string name="geometry_desc">برای تنظیم دستی، تشخیص خودکار را خاموش کن.</string>
+    <string name="btn_detect_cutout">تشخیص دوربین الآن</string>
     <string name="perm_overlay_desc">برای نمایش قرص شناور لازم است.</string>
     <string name="perm_notification_desc">برای خواندن اعلان‌ها و کنترل موزیک لازم است.</string>
     <string name="perm_battery_desc">آیلند را در پس‌زمینه زنده نگه می‌دارد.</string>

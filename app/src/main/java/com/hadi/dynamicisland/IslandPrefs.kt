@@ -15,6 +15,10 @@ object IslandPrefs {
     private const val KEY_TOP_OFFSET = "top_offset_dp"
     private const val KEY_PILL_WIDTH = "pill_width_dp"
     private const val KEY_PILL_HEIGHT = "pill_height_dp"
+    private const val KEY_AUTO_CENTER = "auto_center_dp"
+    private const val KEY_AUTO_WIDTH = "auto_width_dp"
+    private const val KEY_AUTO_HEIGHT = "auto_height_dp"
+    private const val KEY_AUTO_TOP = "auto_top_dp"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -83,16 +87,41 @@ object IslandPrefs {
     }
 
     fun pillWidthDp(context: Context): Float =
-        prefs(context).getFloat(KEY_PILL_WIDTH, 160f)
+        prefs(context).getFloat(KEY_PILL_WIDTH, 44f)
 
     fun setPillWidthDp(context: Context, widthDp: Float) {
         prefs(context).edit().putFloat(KEY_PILL_WIDTH, widthDp).apply()
     }
 
     fun pillHeightDp(context: Context): Float =
-        prefs(context).getFloat(KEY_PILL_HEIGHT, 36f)
+        prefs(context).getFloat(KEY_PILL_HEIGHT, 32f)
 
     fun setPillHeightDp(context: Context, heightDp: Float) {
         prefs(context).edit().putFloat(KEY_PILL_HEIGHT, heightDp).apply()
+    }
+
+    fun setAutoGeometry(
+        context: Context,
+        centerDp: Float,
+        widthDp: Float,
+        heightDp: Float,
+        topDp: Float
+    ) {
+        prefs(context).edit()
+            .putFloat(KEY_AUTO_CENTER, centerDp)
+            .putFloat(KEY_AUTO_WIDTH, widthDp)
+            .putFloat(KEY_AUTO_HEIGHT, heightDp)
+            .putFloat(KEY_AUTO_TOP, topDp)
+            .apply()
+    }
+
+    fun autoGeometry(context: Context): FloatArray {
+        val values = prefs(context)
+        return floatArrayOf(
+            values.getFloat(KEY_AUTO_CENTER, 0f),
+            values.getFloat(KEY_AUTO_WIDTH, 0f),
+            values.getFloat(KEY_AUTO_HEIGHT, 0f),
+            values.getFloat(KEY_AUTO_TOP, 0f)
+        )
     }
 }

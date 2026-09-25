@@ -18,6 +18,7 @@
     <string name="label_pill_width">Pill width</string>
     <string name="label_pill_height">Pill height</string>
     <string name="geometry_desc">Turn off automatic detection to tune the pill manually.</string>
+    <string name="btn_detect_cutout">Detect camera now</string>
     <string name="perm_overlay_desc">Required to draw the floating pill.</string>
     <string name="perm_notification_desc">Required to read alerts and control media.</string>
     <string name="perm_battery_desc">Keeps the island alive in the background.</string>
