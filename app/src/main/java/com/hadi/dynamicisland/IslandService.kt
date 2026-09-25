@@ -78,12 +78,16 @@ class IslandService : Service() {
             if (intent?.action == Intent.ACTION_BATTERY_CHANGED) updateCharging(intent)
         }
     }
+    private val transientListener = { content: IslandState.Content, durationMs: Long ->
+        showTransient(content, durationMs)
+    }
 
     override fun onCreate() {
         super.onCreate()
         IslandLog.installCrashHandler(this)
         IslandLog.log(this, "SERVICE", "Service created")
         overlay = IslandOverlay(this, getSystemService(WindowManager::class.java))
+        IslandState.addTransientListener(transientListener)
         val batteryFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -162,6 +166,7 @@ class IslandService : Service() {
             unregisterReceiver(batteryReceiver)
         } catch (e: Exception) {
         }
+        IslandState.removeTransientListener(transientListener)
         if (::overlay.isInitialized) overlay.hide()
         super.onDestroy()
     }
@@ -184,6 +189,28 @@ class IslandService : Service() {
         handler.removeCallbacks(restoreDefault)
         overlay.collapse()
         restoreAfterTransient()
+    }
+
+    fun toggleIsland() {
+        overlay.toggleExpanded()
+    }
+
+    fun collapseIsland() {
+        overlay.collapse()
+    }
+
+    fun openContent() {
+        val target = IslandState.current().packageName
+        try {
+            val launch = target.takeIf { it.isNotBlank() }?.let {
+                packageManager.getLaunchIntentForPackage(it)
+            }
+            val open = (launch ?: Intent(this, MainActivity::class.java))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(open)
+        } catch (e: Exception) {
+            IslandLog.log(this, "SERVICE", "Content open failed", e)
+        }
     }
 
     private fun startAsForeground() {
@@ -281,7 +308,7 @@ class IslandService : Service() {
         handler.postDelayed(timerTick, 1000L)
     }
 
-    private fun showTransient(content: IslandState.Content, durationMs: Long) {
+    fun showTransient(content: IslandState.Content, durationMs: Long) {
         handler.removeCallbacks(timerTick)
         handler.removeCallbacks(restoreDefault)
         IslandState.setContent(content)

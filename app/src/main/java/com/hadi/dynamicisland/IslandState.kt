@@ -20,7 +20,9 @@ object IslandState {
         val subtitle: String,
         val kind: Kind,
         val isPlaying: Boolean = false,
-        val timerSeconds: Int = 0
+        val timerSeconds: Int = 0,
+        val key: String = "",
+        val packageName: String = ""
     )
 
     @Volatile
@@ -30,6 +32,7 @@ object IslandState {
     var activeMediaController: MediaController? = null
 
     private val listeners = CopyOnWriteArrayList<() -> Unit>()
+    private val transientListeners = CopyOnWriteArrayList<(Content, Long) -> Unit>()
     private val shownKeys = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     fun current(): Content = content
@@ -45,6 +48,23 @@ object IslandState {
     fun setContent(next: Content) {
         content = next
         for (listener in listeners) listener()
+    }
+
+    fun addTransientListener(listener: (Content, Long) -> Unit) {
+        transientListeners.add(listener)
+    }
+
+    fun removeTransientListener(listener: (Content, Long) -> Unit) {
+        transientListeners.remove(listener)
+    }
+
+    fun requestTransient(next: Content, durationMs: Long): Boolean {
+        if (transientListeners.isEmpty()) {
+            setContent(next)
+            return false
+        }
+        for (listener in transientListeners) listener(next, durationMs)
+        return true
     }
 
     fun markShown(key: String): Boolean = shownKeys.add(key)

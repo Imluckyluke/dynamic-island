@@ -38,12 +38,15 @@ class IslandNotificationListener : NotificationListenerService() {
         val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()?.trim().orEmpty()
         if (title.isBlank() && text.isBlank()) return
         IslandState.markShown(posted.key)
-        IslandState.setContent(
+        IslandState.requestTransient(
             IslandState.Content(
                 title = title.ifBlank { text },
                 subtitle = if (title.isBlank()) "" else text,
-                kind = IslandState.Kind.NOTIFICATION
-            )
+                kind = IslandState.Kind.NOTIFICATION,
+                key = posted.key,
+                packageName = posted.packageName
+            ),
+            5000L
         )
         val suppress = shouldSuppress(notification)
         IslandLog.log(

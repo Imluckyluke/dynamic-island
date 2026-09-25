@@ -33,13 +33,23 @@ class IslandOverlay(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP
             y = 0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
         }
-        view.findViewById<View>(R.id.islandPill).setOnClickListener { toggleExpanded() }
+        val pill = view.findViewById<View>(R.id.islandPill)
+        pill.setOnClickListener { service.openContent() }
+        pill.setOnLongClickListener {
+            service.toggleIsland()
+            true
+        }
         view.findViewById<ImageButton>(R.id.btnMediaPrevious).setOnClickListener {
             service.onMediaCommand(MediaMonitor.Command.PREVIOUS)
         }
@@ -54,6 +64,9 @@ class IslandOverlay(
         }
         view.findViewById<View>(R.id.btnDismissIsland).setOnClickListener {
             service.dismissIsland()
+        }
+        view.findViewById<View>(R.id.islandExpanded).setOnClickListener {
+            service.collapseIsland()
         }
         try {
             windowManager.addView(view, params)
