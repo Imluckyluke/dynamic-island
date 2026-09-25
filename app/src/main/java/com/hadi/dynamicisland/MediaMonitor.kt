@@ -30,9 +30,11 @@ object MediaMonitor {
         val component = ComponentName(listener, IslandNotificationListener::class.java)
         val sessions = try {
             manager.getActiveSessions(component)
-        } catch (e: SecurityException) {
+        } catch (e: Exception) {
+            IslandLog.log(listener, "MEDIA", "Active sessions unavailable", e)
             return
         }
+        IslandLog.log(listener, "MEDIA", "Active sessions=${sessions.size}")
         val active = sessions.firstOrNull()
         if (active == null || active.sessionToken != controller?.sessionToken) {
             attach(listener, active)
@@ -85,7 +87,12 @@ object MediaMonitor {
                 detach()
             }
         }
-        next.registerCallback(listenerCallback)
+        try {
+            next.registerCallback(listenerCallback)
+        } catch (e: Exception) {
+            IslandLog.log(context, "MEDIA", "Media callback registration failed", e)
+            return
+        }
         controller = next
         callback = listenerCallback
         IslandState.activeMediaController = next

@@ -81,17 +81,24 @@ class IslandService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        IslandLog.installCrashHandler(this)
+        IslandLog.log(this, "SERVICE", "Service created")
         overlay = IslandOverlay(this, getSystemService(WindowManager::class.java))
         val batteryFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(batteryReceiver, batteryFilter, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(batteryReceiver, batteryFilter)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(batteryReceiver, batteryFilter, RECEIVER_NOT_EXPORTED)
+            } else {
+                registerReceiver(batteryReceiver, batteryFilter)
+            }
+        } catch (e: Exception) {
+            IslandLog.log(this, "SERVICE", "Battery receiver registration failed", e)
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startAsForeground()
+        IslandLog.log(this, "SERVICE", "Command ${intent?.action}")
         if (intent?.action == ACTION_STOP) {
             overlay.hide()
             IslandPrefs.setServiceEnabled(this, false)
@@ -104,7 +111,10 @@ class IslandService : Service() {
                 val command = MediaMonitor.Command.values().getOrNull(
                     intent.getIntExtra(EXTRA_MEDIA_COMMAND, -1)
                 )
-                command?.let { MediaMonitor.command(it) }
+                command?.let {
+                    val handled = MediaMonitor.command(it)
+                    IslandLog.log(this, "SERVICE", "Media command $it handled=$handled")
+                }
             }
             ACTION_TIMER_START -> startTimer(intent.getIntExtra(EXTRA_TIMER_MINUTES, 0))
             ACTION_TIMER_CANCEL -> cancelTimer()
@@ -126,18 +136,27 @@ class IslandService : Service() {
 
     private fun ensureOverlay(): Boolean {
         if (!Settings.canDrawOverlays(this)) {
+            IslandLog.log(this, "SERVICE", "Overlay permission unavailable")
             Toast.makeText(this, R.string.msg_need_overlay, Toast.LENGTH_SHORT).show()
             stopSelf()
             return false
         }
         IslandPrefs.setServiceEnabled(this, true)
-        overlay.show()
-        return true
+        return try {
+            overlay.show()
+            IslandLog.log(this, "SERVICE", "Overlay shown")
+            true
+        } catch (e: Exception) {
+            IslandLog.log(this, "SERVICE", "Overlay failed", e)
+            stopSelf()
+            false
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        IslandLog.log(this, "SERVICE", "Service destroyed")
         handler.removeCallbacksAndMessages(null)
         try {
             unregisterReceiver(batteryReceiver)
@@ -155,6 +174,7 @@ class IslandService : Service() {
     }
 
     fun cancelTimer() {
+        IslandLog.log(this, "SERVICE", "Timer cancelled")
         timerEndElapsed = 0L
         handler.removeCallbacks(timerTick)
         restoreAfterTransient()
@@ -228,6 +248,7 @@ class IslandService : Service() {
     }
 
     private fun startTimer(minutes: Int) {
+        IslandLog.log(this, "SERVICE", "Timer requested minutes=$minutes")
         if (!IslandPrefs.showTimer(this) || minutes <= 0) return
         timerEndElapsed = SystemClock.elapsedRealtime() + minutes * 60_000L
         updateTimer()

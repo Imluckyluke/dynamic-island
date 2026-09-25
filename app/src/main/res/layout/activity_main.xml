@@ -443,6 +443,15 @@
                     app:icon="@android:drawable/ic_menu_compass" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnShareLogs"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/btn_share_logs"
+                    app:icon="@android:drawable/ic_menu_send" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnStartService"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -37,6 +37,9 @@
     <string name="timer_10_minutes">10 min</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_test_island">Test island</string>
+    <string name="btn_share_logs">Send logs</string>
+    <string name="msg_no_logs">No log file is available yet.</string>
+    <string name="share_logs_title">Share island logs</string>
     <string name="msg_need_overlay">Please allow display over other apps first.</string>
     <string name="msg_service_started">Island service started.</string>
     <string name="msg_service_stopped">Island service stopped.</string>

@@ -9,11 +9,19 @@ import android.service.notification.StatusBarNotification
 class IslandNotificationListener : NotificationListenerService() {
     private val handler = Handler(Looper.getMainLooper())
 
+    override fun onCreate() {
+        super.onCreate()
+        IslandLog.installCrashHandler(this)
+        IslandLog.log(this, "LISTENER", "Listener created")
+    }
+
     override fun onListenerConnected() {
+        IslandLog.log(this, "LISTENER", "Listener connected")
         MediaMonitor.refresh(this)
     }
 
     override fun onListenerDisconnected() {
+        IslandLog.log(this, "LISTENER", "Listener disconnected")
         MediaMonitor.clear()
     }
 
@@ -37,11 +45,20 @@ class IslandNotificationListener : NotificationListenerService() {
                 kind = IslandState.Kind.NOTIFICATION
             )
         )
-        if (shouldSuppress(notification)) {
+        val suppress = shouldSuppress(notification)
+        IslandLog.log(
+            this,
+            "LISTENER",
+            "Posted package=${posted.packageName} category=${notification.category} " +
+                "ongoing=${posted.isOngoing} hasText=${title.isNotBlank() || text.isNotBlank()} " +
+                "suppress=$suppress"
+        )
+        if (suppress) {
             handler.post {
                 try {
                     cancelNotification(posted.key)
                 } catch (e: Exception) {
+                    IslandLog.log(this, "LISTENER", "Cancel failed package=${posted.packageName}", e)
                 }
             }
         }

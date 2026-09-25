@@ -1,10 +1,8 @@
 package com.hadi.dynamicisland
 
-import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.os.Build
+import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -54,7 +52,12 @@ class IslandOverlay(
         view.findViewById<View>(R.id.btnDismissIsland).setOnClickListener {
             service.dismissIsland()
         }
-        windowManager.addView(view, params)
+        try {
+            windowManager.addView(view, params)
+        } catch (e: Exception) {
+            IslandLog.log(service, "OVERLAY", "Overlay add failed", e)
+            throw e
+        }
         root = view
         IslandState.addListener(stateListener)
         update()
@@ -65,6 +68,7 @@ class IslandOverlay(
             try {
                 windowManager.removeView(it)
             } catch (e: Exception) {
+                IslandLog.log(service, "OVERLAY", "Overlay remove failed", e)
             }
         }
         root = null
@@ -87,6 +91,15 @@ class IslandOverlay(
     }
 
     private fun update() {
+        val view = root ?: return
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            view.post { performUpdate() }
+            return
+        }
+        performUpdate()
+    }
+
+    private fun performUpdate() {
         val view = root ?: return
         val content = IslandState.current()
         val pill = view.findViewById<LinearLayout>(R.id.islandPill)

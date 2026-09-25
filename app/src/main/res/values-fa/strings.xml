@@ -37,6 +37,9 @@
     <string name="timer_10_minutes">۱۰ دقیقه</string>
     <string name="btn_cancel">لغو</string>
     <string name="btn_test_island">تست آیلند</string>
+    <string name="btn_share_logs">ارسال لاگ‌ها</string>
+    <string name="msg_no_logs">هنوز فایل لاگی موجود نیست.</string>
+    <string name="share_logs_title">اشتراک‌گذاری لاگ‌های آیلند</string>
     <string name="msg_need_overlay">اول اجازه نمایش روی برنامه‌های دیگر را بده.</string>
     <string name="msg_service_started">سرویس آیلند روشن شد.</string>
     <string name="msg_service_stopped">سرویس آیلند خاموش شد.</string>

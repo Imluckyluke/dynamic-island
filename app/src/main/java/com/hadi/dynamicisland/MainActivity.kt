@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
@@ -36,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         DynamicColors.applyToActivityIfAvailable(this)
         super.onCreate(savedInstanceState)
+        IslandLog.installCrashHandler(this)
+        IslandLog.log(this, "MAIN", "MainActivity created")
         setContentView(R.layout.activity_main)
         tvStatus = findViewById(R.id.tvStatus)
         statusDot = findViewById(R.id.statusDot)
@@ -101,7 +104,11 @@ class MainActivity : AppCompatActivity() {
             IslandService.cancelTimer(this)
         }
         findViewById<MaterialButton>(R.id.btnTestIsland).setOnClickListener {
+            IslandLog.log(this, "MAIN", "Test requested")
             IslandService.showTest(this)
+        }
+        findViewById<MaterialButton>(R.id.btnShareLogs).setOnClickListener {
+            shareLogs()
         }
         findViewById<MaterialButton>(R.id.btnStartService).setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
@@ -109,11 +116,13 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             IslandService.start(this)
+            IslandLog.log(this, "MAIN", "Service start requested")
             Toast.makeText(this, R.string.msg_service_started, Toast.LENGTH_SHORT).show()
             refreshStatus()
         }
         findViewById<MaterialButton>(R.id.btnStopService).setOnClickListener {
             IslandService.stop(this)
+            IslandLog.log(this, "MAIN", "Service stop requested")
             Toast.makeText(this, R.string.msg_service_stopped, Toast.LENGTH_SHORT).show()
             refreshStatus()
         }
@@ -132,6 +141,31 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == NOTIFICATION_PERMISSION_CODE) refreshStatus()
+    }
+
+    private fun shareLogs() {
+        val source = IslandLog.currentFile(this)
+        if (!source.exists() || source.length() == 0L) {
+            Toast.makeText(this, R.string.msg_no_logs, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val directory = java.io.File(cacheDir, "shared-logs")
+        if (!directory.exists()) directory.mkdirs()
+        val file = java.io.File(directory, "island-log.txt")
+        try {
+            source.copyTo(file, overwrite = true)
+        } catch (e: Exception) {
+            IslandLog.log(this, "MAIN", "Log copy failed", e)
+            Toast.makeText(this, R.string.msg_no_logs, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        val share = Intent(Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_STREAM, uri)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(Intent.createChooser(share, getString(R.string.share_logs_title)))
+        IslandLog.log(this, "MAIN", "Logs shared")
     }
 
     private fun refreshStatus() {
