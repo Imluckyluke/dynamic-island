@@ -298,6 +298,17 @@
                     android:layout_height="wrap_content" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/swKeepInShade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="@string/label_keep_in_shade" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/swKeepPriority"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

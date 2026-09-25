@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvStatus: TextView
     private lateinit var statusDot: View
     private lateinit var swSuppress: SwitchMaterial
+    private lateinit var swKeepInShade: SwitchMaterial
     private lateinit var swKeepPriority: SwitchMaterial
     private lateinit var swMedia: SwitchMaterial
     private lateinit var swCharging: SwitchMaterial
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         statusDot = findViewById(R.id.statusDot)
         swSuppress = findViewById(R.id.swSuppressDuplicates)
+        swKeepInShade = findViewById(R.id.swKeepInShade)
         swKeepPriority = findViewById(R.id.swKeepPriority)
         swMedia = findViewById(R.id.swMedia)
         swCharging = findViewById(R.id.swCharging)
@@ -60,12 +62,16 @@ class MainActivity : AppCompatActivity() {
         sliderPillHeight = findViewById(R.id.sliderPillHeight)
 
         swSuppress.isChecked = IslandPrefs.suppressDuplicates(this)
+        swKeepInShade.isChecked = IslandPrefs.keepInShade(this)
         swKeepPriority.isChecked = IslandPrefs.keepPriority(this)
         swMedia.isChecked = IslandPrefs.showMedia(this)
         swCharging.isChecked = IslandPrefs.showCharging(this)
         swTimer.isChecked = IslandPrefs.showTimer(this)
         swSuppress.setOnCheckedChangeListener { _, checked ->
             IslandPrefs.setSuppressDuplicates(this, checked)
+        }
+        swKeepInShade.setOnCheckedChangeListener { _, checked ->
+            IslandPrefs.setKeepInShade(this, checked)
         }
         swKeepPriority.setOnCheckedChangeListener { _, checked ->
             IslandPrefs.setKeepPriority(this, checked)

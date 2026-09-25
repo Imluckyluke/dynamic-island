@@ -35,6 +35,7 @@
     <string name="btn_start">Start island</string>
     <string name="btn_stop">Stop island</string>
     <string name="label_suppress_duplicates">Suppress original notifications</string>
+    <string name="label_keep_in_shade">Keep originals in notification shade</string>
     <string name="label_keep_priority">Keep calls, alarms, and ongoing alerts</string>
     <string name="label_media">Show media playback</string>
     <string name="label_charging">Show charging status</string>

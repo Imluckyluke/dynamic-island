@@ -126,7 +126,8 @@ object MediaMonitor {
                 title = title,
                 subtitle = artist,
                 kind = IslandState.Kind.MEDIA,
-                isPlaying = playing
+                isPlaying = playing,
+                packageName = mediaController.packageName
             )
         )
     }

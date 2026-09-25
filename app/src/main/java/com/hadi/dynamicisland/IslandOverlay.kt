@@ -1,5 +1,7 @@
 package com.hadi.dynamicisland
 
+import android.animation.ValueAnimator
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
@@ -12,6 +14,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 
@@ -22,6 +25,7 @@ class IslandOverlay(
     private var root: View? = null
     private var expanded = false
     private var lastDropKey: String? = null
+    private var visualAnimator: ValueAnimator? = null
     private val stateListener = { update() }
 
     fun show() {
@@ -46,7 +50,7 @@ class IslandOverlay(
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                blurBehindRadius = 48
+                blurBehindRadius = 80
             }
         }
         val pill = view.findViewById<View>(R.id.islandPill)
@@ -125,6 +129,8 @@ class IslandOverlay(
     }
 
     fun hide() {
+        visualAnimator?.cancel()
+        visualAnimator = null
         root?.let {
             try {
                 windowManager.removeView(it)
@@ -272,6 +278,19 @@ class IslandOverlay(
         pillDot.visibility = if (idle) View.GONE else View.VISIBLE
         pillTitle.visibility = if (idle) View.GONE else View.VISIBLE
         pillTitle.text = content.title
+        pill.setBackgroundResource(
+            if (idle) R.drawable.island_stealth_background else R.drawable.island_background
+        )
+        pillDot.backgroundTintList = ColorStateList.valueOf(
+            when (content.kind) {
+                IslandState.Kind.MEDIA -> Color.parseColor("#B388FF")
+                IslandState.Kind.CHARGING -> Color.parseColor("#00E676")
+                IslandState.Kind.TIMER -> Color.parseColor("#FFB300")
+                else -> Color.parseColor("#00E5A0")
+            }
+        )
+        loadAppIcon(view, content.packageName)
+        setVisualizer(view, content.kind == IslandState.Kind.MEDIA && content.isPlaying && expanded)
         view.findViewById<TextView>(R.id.islandExpandedTitle).text =
             content.title.ifBlank { service.getString(R.string.island_default_title) }
         val subtitle = view.findViewById<TextView>(R.id.islandExpandedSubtitle)
@@ -334,5 +353,47 @@ class IslandOverlay(
 
     private fun tint(view: View, id: Int) {
         view.findViewById<ImageButton>(id)?.setColorFilter(Color.WHITE)
+    }
+
+    private fun loadAppIcon(view: View, packageName: String) {
+        val icon = view.findViewById<ImageView>(R.id.islandAppIcon) ?: return
+        if (packageName.isBlank()) {
+            icon.visibility = View.GONE
+            return
+        }
+        try {
+            icon.setImageDrawable(service.packageManager.getApplicationIcon(packageName))
+            icon.visibility = View.VISIBLE
+        } catch (e: Exception) {
+            icon.visibility = View.GONE
+        }
+    }
+
+    private fun setVisualizer(view: View, running: Boolean) {
+        val visualizer = view.findViewById<View>(R.id.islandVisualizer) ?: return
+        visualizer.visibility = if (running) View.VISIBLE else View.GONE
+        if (!running) {
+            visualAnimator?.cancel()
+            visualAnimator = null
+            return
+        }
+        if (visualAnimator != null) return
+        val density = service.resources.displayMetrics.density
+        val bars = listOf(R.id.bar1, R.id.bar2, R.id.bar3, R.id.bar4, R.id.bar5)
+            .mapNotNull { view.findViewById<View>(it) }
+        visualAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 900
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.REVERSE
+            addUpdateListener { animation ->
+                val phase = (animation.animatedValue as Float) * 2f * Math.PI.toFloat()
+                bars.forEachIndexed { index, bar ->
+                    val height = 6 + 14 * Math.abs(Math.sin((phase + index * 1.3).toDouble()))
+                    bar.layoutParams.height = (height * density).toInt()
+                    bar.requestLayout()
+                }
+            }
+            start()
+        }
     }
 }

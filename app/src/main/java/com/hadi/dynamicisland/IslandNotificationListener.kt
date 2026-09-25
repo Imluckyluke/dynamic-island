@@ -59,9 +59,14 @@ class IslandNotificationListener : NotificationListenerService() {
         if (suppress) {
             handler.post {
                 try {
-                    cancelNotification(posted.key)
+                    if (IslandPrefs.keepInShade(this)) {
+                        snoozeNotification(posted.key, 15000L)
+                        IslandLog.log(this, "LISTENER", "Snoozed package=${posted.packageName}")
+                    } else {
+                        cancelNotification(posted.key)
+                    }
                 } catch (e: Exception) {
-                    IslandLog.log(this, "LISTENER", "Cancel failed package=${posted.packageName}", e)
+                    IslandLog.log(this, "LISTENER", "Suppress failed package=${posted.packageName}", e)
                 }
             }
         }

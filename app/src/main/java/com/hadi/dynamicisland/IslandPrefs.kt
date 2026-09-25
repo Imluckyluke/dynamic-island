@@ -6,6 +6,7 @@ object IslandPrefs {
     private const val PREFS_NAME = "island_prefs"
     private const val KEY_SERVICE_ENABLED = "service_enabled"
     private const val KEY_SUPPRESS_DUPLICATES = "suppress_duplicates"
+    private const val KEY_KEEP_IN_SHADE = "keep_in_shade"
     private const val KEY_KEEP_PRIORITY = "keep_priority"
     private const val KEY_SHOW_MEDIA = "show_media"
     private const val KEY_SHOW_CHARGING = "show_charging"
@@ -35,6 +36,13 @@ object IslandPrefs {
 
     fun setSuppressDuplicates(context: Context, suppress: Boolean) {
         prefs(context).edit().putBoolean(KEY_SUPPRESS_DUPLICATES, suppress).apply()
+    }
+
+    fun keepInShade(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_KEEP_IN_SHADE, true)
+
+    fun setKeepInShade(context: Context, keep: Boolean) {
+        prefs(context).edit().putBoolean(KEY_KEEP_IN_SHADE, keep).apply()
     }
 
     fun keepPriority(context: Context): Boolean =
