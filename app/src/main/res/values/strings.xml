@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dynamic Island</string>
+    <string name="setup_title">Island setup</string>
+    <string name="setup_subtitle">Grant access, then start the floating island.</string>
+    <string name="perm_overlay">Display over other apps</string>
+    <string name="perm_notification_access">Notification access</string>
+    <string name="perm_battery">Ignore battery optimization</string>
+    <string name="perm_notifications">Notifications</string>
+    <string name="service_status_enabled">Island service: running</string>
+    <string name="service_status_disabled">Island service: stopped</string>
+    <string name="btn_grant">Grant</string>
+    <string name="btn_open_settings">Open settings</string>
+    <string name="btn_start">Start island</string>
+    <string name="btn_stop">Stop island</string>
+    <string name="label_suppress_duplicates">Suppress original notifications</string>
+    <string name="label_keep_priority">Keep calls, alarms, and ongoing alerts</string>
+    <string name="label_media">Show media playback</string>
+    <string name="label_charging">Show charging status</string>
+    <string name="label_timer">Enable island timer</string>
+    <string name="timer_title">Island timer</string>
+    <string name="timer_1_minute">1 min</string>
+    <string name="timer_5_minutes">5 min</string>
+    <string name="timer_10_minutes">10 min</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_test_island">Test island</string>
+    <string name="msg_need_overlay">Please allow display over other apps first.</string>
+    <string name="msg_service_started">Island service started.</string>
+    <string name="msg_service_stopped">Island service stopped.</string>
+    <string name="island_default_title">Island</string>
+    <string name="media_unknown_title">Now playing</string>
+    <string name="media_unknown_artist">Unknown artist</string>
+    <string name="media_play">Play</string>
+    <string name="media_pause">Pause</string>
+    <string name="media_previous">Previous</string>
+    <string name="media_next">Next</string>
+    <string name="charging_connected">Charging · %1$d%%</string>
+    <string name="timer_remaining">%1$d:%02$d</string>
+    <string name="timer_done">Timer done</string>
+    <string name="test_title">Dynamic Island</string>
+    <string name="test_subtitle">Prototype is working</string>
+    <string name="notif_channel_name">Island service</string>
+    <string name="notif_channel_description">Keeps the Dynamic Island overlay running.</string>
+    <string name="service_running">Dynamic Island is running. Tap to open settings.</string>
+    <string name="dismiss_island">Dismiss</string>
+</resources>

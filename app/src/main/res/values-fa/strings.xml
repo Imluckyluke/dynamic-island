@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">داینامیک آیلند</string>
+    <string name="setup_title">راه‌اندازی آیلند</string>
+    <string name="setup_subtitle">اول دسترسی‌ها را بده، بعد آیلند شناور را روشن کن.</string>
+    <string name="perm_overlay">نمایش روی برنامه‌های دیگر</string>
+    <string name="perm_notification_access">دسترسی به اعلان‌ها</string>
+    <string name="perm_battery">نادیده گرفتن بهینه‌سازی باتری</string>
+    <string name="perm_notifications">اعلان‌ها</string>
+    <string name="service_status_enabled">سرویس آیلند: روشن</string>
+    <string name="service_status_disabled">سرویس آیلند: خاموش</string>
+    <string name="btn_grant">اعطا</string>
+    <string name="btn_open_settings">باز کردن تنظیمات</string>
+    <string name="btn_start">روشن کردن آیلند</string>
+    <string name="btn_stop">خاموش کردن آیلند</string>
+    <string name="label_suppress_duplicates">حذف اعلان اصلی گوشی</string>
+    <string name="label_keep_priority">نگه داشتن تماس، آلارم و اعلان‌های جاری</string>
+    <string name="label_media">نمایش پخش موزیک</string>
+    <string name="label_charging">نمایش وضعیت شارژ</string>
+    <string name="label_timer">فعال بودن تایمر آیلند</string>
+    <string name="timer_title">تایمر آیلند</string>
+    <string name="timer_1_minute">۱ دقیقه</string>
+    <string name="timer_5_minutes">۵ دقیقه</string>
+    <string name="timer_10_minutes">۱۰ دقیقه</string>
+    <string name="btn_cancel">لغو</string>
+    <string name="btn_test_island">تست آیلند</string>
+    <string name="msg_need_overlay">اول اجازه نمایش روی برنامه‌های دیگر را بده.</string>
+    <string name="msg_service_started">سرویس آیلند روشن شد.</string>
+    <string name="msg_service_stopped">سرویس آیلند خاموش شد.</string>
+    <string name="island_default_title">آیلند</string>
+    <string name="media_unknown_title">در حال پخش</string>
+    <string name="media_unknown_artist">خواننده نامشخص</string>
+    <string name="media_play">پخش</string>
+    <string name="media_pause">توقف</string>
+    <string name="media_previous">قبلی</string>
+    <string name="media_next">بعدی</string>
+    <string name="charging_connected">در حال شارژ · %1$d٪</string>
+    <string name="timer_remaining">%1$d:%02$d</string>
+    <string name="timer_done">تایمر تمام شد</string>
+    <string name="test_title">داینامیک آیلند</string>
+    <string name="test_subtitle">نمونه اولیه کار می‌کند</string>
+    <string name="notif_channel_name">سرویس آیلند</string>
+    <string name="notif_channel_description">آیلند شناور را روشن نگه می‌دارد.</string>
+    <string name="service_running">داینامیک آیلند روشن است. برای تنظیمات بزن.</string>
+    <string name="dismiss_island">بستن</string>
+</resources>

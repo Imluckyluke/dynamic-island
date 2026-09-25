@@ -1,0 +1,162 @@
+package com.hadi.dynamicisland
+
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.switchmaterial.SwitchMaterial
+import android.widget.TextView
+
+class MainActivity : AppCompatActivity() {
+    companion object {
+        private const val NOTIFICATION_PERMISSION_CODE = 1001
+    }
+
+    private lateinit var tvStatus: TextView
+    private lateinit var swSuppress: SwitchMaterial
+    private lateinit var swKeepPriority: SwitchMaterial
+    private lateinit var swMedia: SwitchMaterial
+    private lateinit var swCharging: SwitchMaterial
+    private lateinit var swTimer: SwitchMaterial
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        tvStatus = findViewById(R.id.tvStatus)
+        swSuppress = findViewById(R.id.swSuppressDuplicates)
+        swKeepPriority = findViewById(R.id.swKeepPriority)
+        swMedia = findViewById(R.id.swMedia)
+        swCharging = findViewById(R.id.swCharging)
+        swTimer = findViewById(R.id.swTimer)
+
+        swSuppress.isChecked = IslandPrefs.suppressDuplicates(this)
+        swKeepPriority.isChecked = IslandPrefs.keepPriority(this)
+        swMedia.isChecked = IslandPrefs.showMedia(this)
+        swCharging.isChecked = IslandPrefs.showCharging(this)
+        swTimer.isChecked = IslandPrefs.showTimer(this)
+        swSuppress.setOnCheckedChangeListener { _, checked ->
+            IslandPrefs.setSuppressDuplicates(this, checked)
+        }
+        swKeepPriority.setOnCheckedChangeListener { _, checked ->
+            IslandPrefs.setKeepPriority(this, checked)
+        }
+        swMedia.setOnCheckedChangeListener { _, checked ->
+            IslandPrefs.setShowMedia(this, checked)
+        }
+        swCharging.setOnCheckedChangeListener { _, checked ->
+            IslandPrefs.setShowCharging(this, checked)
+        }
+        swTimer.setOnCheckedChangeListener { _, checked ->
+            IslandPrefs.setShowTimer(this, checked)
+        }
+
+        findViewById<MaterialButton>(R.id.btnOverlayPermission).setOnClickListener {
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+            )
+        }
+        findViewById<MaterialButton>(R.id.btnNotificationAccess).setOnClickListener {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+        findViewById<MaterialButton>(R.id.btnBatteryOptimization).setOnClickListener {
+            startActivity(
+                Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:$packageName")
+                )
+            )
+        }
+        findViewById<MaterialButton>(R.id.btnPostNotifications).setOnClickListener {
+            requestPostNotifications()
+        }
+        findViewById<MaterialButton>(R.id.btnTimer1).setOnClickListener {
+            IslandService.startTimer(this, 1)
+        }
+        findViewById<MaterialButton>(R.id.btnTimer5).setOnClickListener {
+            IslandService.startTimer(this, 5)
+        }
+        findViewById<MaterialButton>(R.id.btnTimer10).setOnClickListener {
+            IslandService.startTimer(this, 10)
+        }
+        findViewById<MaterialButton>(R.id.btnCancelTimer).setOnClickListener {
+            IslandService.cancelTimer(this)
+        }
+        findViewById<MaterialButton>(R.id.btnTestIsland).setOnClickListener {
+            IslandService.showTest(this)
+        }
+        findViewById<MaterialButton>(R.id.btnStartService).setOnClickListener {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, R.string.msg_need_overlay, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            IslandService.start(this)
+            Toast.makeText(this, R.string.msg_service_started, Toast.LENGTH_SHORT).show()
+            refreshStatus()
+        }
+        findViewById<MaterialButton>(R.id.btnStopService).setOnClickListener {
+            IslandService.stop(this)
+            Toast.makeText(this, R.string.msg_service_stopped, Toast.LENGTH_SHORT).show()
+            refreshStatus()
+        }
+        refreshStatus()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshStatus()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) refreshStatus()
+    }
+
+    private fun refreshStatus() {
+        val overlay = Settings.canDrawOverlays(this)
+        val listener = NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
+        val battery = getSystemService(PowerManager::class.java)
+            ?.isIgnoringBatteryOptimizations(packageName) == true
+        val notifications = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        val ready = overlay && listener && battery && notifications
+        tvStatus.text = getString(
+            if (ready) R.string.service_status_enabled else R.string.service_status_disabled
+        )
+    }
+
+    private fun requestPostNotifications() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            refreshStatus()
+            return
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            refreshStatus()
+            return
+        }
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            NOTIFICATION_PERMISSION_CODE
+        )
+    }
+}

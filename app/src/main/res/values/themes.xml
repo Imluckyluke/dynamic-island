@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.DynamicIsland" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/island_accent</item>
+        <item name="colorOnPrimary">@color/island_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+</resources>
