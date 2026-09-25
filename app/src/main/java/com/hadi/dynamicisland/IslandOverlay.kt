@@ -50,7 +50,7 @@ class IslandOverlay(
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                blurBehindRadius = 80
+                blurBehindRadius = 150
             }
         }
         val pill = view.findViewById<View>(R.id.islandPill)
@@ -85,6 +85,12 @@ class IslandOverlay(
         }
         root = view
         IslandState.addListener(stateListener)
+        IslandLog.log(
+            service,
+            "OVERLAY",
+            "Overlay added blur=" +
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) 150 else 0
+        )
         update()
         view.post { recalibrate() }
     }
