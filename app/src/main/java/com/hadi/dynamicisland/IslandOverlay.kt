@@ -3,6 +3,7 @@ package com.hadi.dynamicisland
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Looper
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +25,8 @@ class IslandOverlay(
             update()
             return
         }
-        val view = LayoutInflater.from(service).inflate(R.layout.island_view, null)
+        val themedService = ContextThemeWrapper(service, R.style.Theme_DynamicIsland)
+        val view = LayoutInflater.from(themedService).inflate(R.layout.island_view, null)
         val density = service.resources.displayMetrics.density
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
