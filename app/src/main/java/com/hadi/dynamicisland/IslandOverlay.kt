@@ -307,19 +307,20 @@ class IslandOverlay(
         val dropKey = content.kind.name + "|" + content.key + "|" + content.title
         if (lastDropKey == dropKey) return
         lastDropKey = dropKey
+        val density = service.resources.displayMetrics.density
+        val fallDistance = if (expandedView.height > 0) {
+            expandedView.height.toFloat()
+        } else {
+            120f * density
+        }
+        expandedView.animate().cancel()
+        expandedView.alpha = 0f
+        expandedView.translationY = -fallDistance
+        expandedView.scaleX = 0.92f
+        expandedView.scaleY = 0.92f
+        expandedView.visibility = View.VISIBLE
         expandedView.post {
             if (root == null || !expanded) return@post
-            val density = service.resources.displayMetrics.density
-            val fallDistance = if (expandedView.height > 0) {
-                expandedView.height.toFloat()
-            } else {
-                120f * density
-            }
-            expandedView.alpha = 0f
-            expandedView.translationY = -fallDistance
-            expandedView.scaleX = 0.92f
-            expandedView.scaleY = 0.92f
-            expandedView.animate().cancel()
             expandedView.animate()
                 .translationY(0f)
                 .alpha(1f)
