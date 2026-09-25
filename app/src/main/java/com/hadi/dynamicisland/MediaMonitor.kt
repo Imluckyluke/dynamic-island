@@ -35,7 +35,7 @@ object MediaMonitor {
         }
         val active = sessions.firstOrNull()
         if (active == null || active.sessionToken != controller?.sessionToken) {
-            attach(active)
+            attach(listener, active)
         } else {
             updateFromController(listener, active)
         }
@@ -59,7 +59,7 @@ object MediaMonitor {
         }
     }
 
-    private fun attach(next: MediaController?) {
+    private fun attach(context: Context, next: MediaController?) {
         controller?.let { current ->
             callback?.let { current.unregisterCallback(it) }
         }
@@ -74,11 +74,11 @@ object MediaMonitor {
         }
         val listenerCallback = object : MediaController.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadata?) {
-                updateFromController(next.context, next)
+                updateFromController(context, next)
             }
 
             override fun onPlaybackStateChanged(state: PlaybackState?) {
-                updateFromController(next.context, next)
+                updateFromController(context, next)
             }
 
             override fun onSessionDestroyed() {
@@ -89,7 +89,7 @@ object MediaMonitor {
         controller = next
         callback = listenerCallback
         IslandState.activeMediaController = next
-        updateFromController(next.context, next)
+        updateFromController(context, next)
     }
 
     private fun detach() {
